@@ -30,11 +30,11 @@ export function TeamRow({ team, score, align = 'left', size = 'sm' }: TeamRowPro
       <span className={cn('shrink-0', cfg.flag)} aria-label={team?.name || 'TBD'}>
         {team?.flag || '🏳️'}
       </span>
-      <span className={cn('truncate', cfg.name, team ? 'text-white' : 'text-white/40')}>
+      <span className={cn('truncate', cfg.name, team ? 'text-[#1A1614] dark:text-[#FAF5F0]' : 'text-[#B5ADA7] dark:text-[#7D7570]')}>
         {team?.name || 'TBD'}
       </span>
       {score !== undefined && (
-        <span className={cn('shrink-0 tabular-nums', cfg.score, 'text-white')}>
+        <span className={cn('shrink-0 tabular-nums', cfg.score, 'text-[#1A1614] dark:text-[#FAF5F0]')}>
           {score}
         </span>
       )}

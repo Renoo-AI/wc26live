@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useMemo, useCallback } from 'react';
+import { useRef, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { format, parseISO, isToday, isTomorrow } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -76,29 +76,29 @@ export function DatePillSelector() {
           return (
             <motion.button
               key={dateStr}
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setSelectedDate(dateStr)}
               className={cn(
                 'flex flex-col items-center justify-center min-w-[64px] min-h-[44px] px-3 py-2 rounded-xl border transition-all duration-200 shrink-0',
                 isActive
-                  ? 'bg-[#00E676]/15 border-[#00E676]/40 text-[#00E676]'
-                  : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white/80'
+                  ? 'bg-[rgba(217,119,87,0.08)] border-[#D97757]/20 text-[#D97757] dark:bg-[rgba(232,139,110,0.08)] dark:border-[rgba(232,139,110,0.2)] dark:text-[#E88B6E]'
+                  : 'bg-transparent border-[#F0EBE5] text-[#6B5F57] hover:bg-[#FAF8F5] hover:text-[#3D3530] dark:border-[rgba(250,245,240,0.08)] dark:text-[#A89E96] dark:hover:bg-[#3D3632] dark:hover:text-[#FAF5F0]'
               )}
             >
               <span className={cn(
                 'text-xs font-semibold',
-                today && !isActive && 'text-[#FFD700]'
+                today && !isActive && 'text-[#C4953A] dark:text-[#E8B94A]'
               )}>
                 {getLabel(dateStr)}
               </span>
-              <span className="text-[10px] text-white/40 mt-0.5">{getSublabel(dateStr)}</span>
+              <span className="text-[10px] text-[#9C908A] dark:text-[#7D7570] mt-0.5">{getSublabel(dateStr)}</span>
             </motion.button>
           );
         })}
       </div>
       {/* Fade edges */}
-      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-[#0A0E1A] to-transparent" />
-      <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-[#0A0E1A] to-transparent" />
+      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-[#F5F0EB] dark:from-[#1C1917] to-transparent" />
+      <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-[#F5F0EB] dark:from-[#1C1917] to-transparent" />
     </div>
   );
 }

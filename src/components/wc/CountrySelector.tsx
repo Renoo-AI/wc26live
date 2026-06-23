@@ -53,14 +53,14 @@ export function CountrySelector({ countryCode, countryName, flag, onSelect }: Co
   return (
     <div className="relative" ref={popoverRef}>
       <motion.button
-        whileTap={{ scale: 0.95 }}
+        whileTap={{ scale: 0.98 }}
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/10 rounded-full px-3 py-1.5 text-sm text-white/80 hover:bg-white/15 transition-colors min-h-[44px]"
+        className="flex items-center gap-1.5 bg-[#EDE8E2] dark:bg-[#3D3632] border border-[#E8E1DA] dark:border-[rgba(250,245,240,0.08)] rounded-full px-3 py-1.5 text-sm text-[#3D3530] dark:text-[#FAF5F0] hover:bg-[#E8E1DA] dark:hover:bg-[rgba(250,245,240,0.1)] transition-colors min-h-[44px]"
       >
         <span>{flag}</span>
         <span className="hidden sm:inline text-xs">{countryName}</span>
         <ChevronDown
-          className={cn('size-3.5 text-white/40 transition-transform', open && 'rotate-180')}
+          className={cn('size-3.5 text-[#9C908A] dark:text-[#7D7570] transition-transform', open && 'rotate-180')}
         />
       </motion.button>
 
@@ -71,19 +71,19 @@ export function CountrySelector({ countryCode, countryName, flag, onSelect }: Co
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 top-full mt-2 w-72 max-h-[340px] bg-[#151B2E] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50 flex flex-col"
+            className="absolute right-0 top-full mt-2 w-72 max-h-[340px] bg-white dark:bg-[#292524] border border-[#E8E1DA] dark:border-[rgba(250,245,240,0.08)] rounded-2xl shadow-[0_8px_24px_rgba(26,22,20,0.08)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.3)] overflow-hidden z-50 flex flex-col"
           >
             {/* Search */}
-            <div className="p-3 border-b border-white/5">
-              <div className="flex items-center gap-2 bg-white/5 rounded-xl px-3 py-2">
-                <Search className="size-4 text-white/30" />
+            <div className="p-3 border-b border-[#F0EBE5] dark:border-[rgba(250,245,240,0.06)]">
+              <div className="flex items-center gap-2 bg-[#EDE8E2] dark:bg-[#3D3632] rounded-xl px-3 py-2">
+                <Search className="size-4 text-[#B5ADA7] dark:text-[#7D7570]" />
                 <input
                   ref={inputRef}
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search country..."
-                  className="bg-transparent text-sm text-white placeholder:text-white/30 outline-none flex-1"
+                  className="bg-transparent text-sm text-[#1A1614] dark:text-[#FAF5F0] placeholder:text-[#B5ADA7] dark:placeholder:text-[#7D7570] outline-none flex-1"
                 />
               </div>
             </div>
@@ -91,7 +91,7 @@ export function CountrySelector({ countryCode, countryName, flag, onSelect }: Co
             {/* List */}
             <div className="overflow-y-auto flex-1 p-1.5">
               {filtered.length === 0 ? (
-                <p className="text-center text-white/30 text-xs py-6">No countries found</p>
+                <p className="text-center text-[#B5ADA7] dark:text-[#7D7570] text-xs py-6">No countries found</p>
               ) : (
                 filtered.map((c) => (
                   <button
@@ -108,8 +108,8 @@ export function CountrySelector({ countryCode, countryName, flag, onSelect }: Co
                     className={cn(
                       'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors min-h-[44px]',
                       c.countryCode === countryCode
-                        ? 'bg-[#00E676]/10 text-[#00E676]'
-                        : 'text-white/70 hover:bg-white/5 hover:text-white'
+                        ? 'bg-[rgba(217,119,87,0.08)] text-[#D97757] dark:text-[#E88B6E]'
+                        : 'text-[#6B5F57] dark:text-[#A89E96] hover:bg-[#FAF8F5] dark:hover:bg-[#3D3632]'
                     )}
                   >
                     <span className="text-lg">{c.flag}</span>

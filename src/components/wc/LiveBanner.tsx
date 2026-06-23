@@ -22,43 +22,24 @@ export function LiveBanner() {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="relative overflow-hidden rounded-2xl mx-4 mt-2"
+      className={cn(
+        'relative overflow-hidden rounded-2xl mx-4 mt-2',
+        'bg-white dark:bg-[#292524]',
+        'border border-[#E8E1DA] dark:border-[rgba(250,245,240,0.08)]',
+        'shadow-[0_1px_3px_rgba(26,22,20,0.04),0_1px_2px_rgba(26,22,20,0.03)] dark:shadow-none'
+      )}
     >
-      {/* Animated gradient background */}
-      <motion.div
-        className="absolute inset-0"
-        animate={{
-          background: liveMatch
-            ? [
-                'linear-gradient(135deg, #1a0a0a 0%, #2a1515 50%, #0A0E1A 100%)',
-                'linear-gradient(135deg, #2a1515 0%, #1a0a0a 50%, #151B2E 100%)',
-                'linear-gradient(135deg, #1a0a0a 0%, #2a1515 50%, #0A0E1A 100%)',
-              ]
-            : [
-                'linear-gradient(135deg, #0A0E1A 0%, #0a1a12 50%, #0A0E1A 100%)',
-                'linear-gradient(135deg, #0a1a12 0%, #0A0E1A 50%, #0a2015 100%)',
-                'linear-gradient(135deg, #0A0E1A 0%, #0a1a12 50%, #0A0E1A 100%)',
-              ],
-        }}
-        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <div className="absolute inset-0 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl" />
-
       <div className="relative p-4 sm:p-5">
         {liveMatch ? (
           /* LIVE MATCH */
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2">
-              <motion.span
-                className="inline-flex items-center gap-1.5 bg-red-500/20 text-[#FF3B3B] text-xs font-bold px-2.5 py-1 rounded-full"
-                animate={{ opacity: [1, 0.5, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              >
-                <span className="w-2 h-2 rounded-full bg-[#FF3B3B]" />
+              <span className="inline-flex items-center gap-1.5 bg-[rgba(217,72,72,0.08)] text-[#D94848] text-xs font-bold px-2.5 py-1 rounded-full dark:bg-[rgba(248,113,113,0.08)] dark:text-[#F87171]">
+                <span className="w-2 h-2 rounded-full bg-[#D94848] dark:bg-[#F87171] soft-pulse" />
                 LIVE
-              </motion.span>
+              </span>
               {liveMatch.minute && (
-                <span className="text-white/60 text-xs">{liveMatch.minute}&apos;</span>
+                <span className="text-[#9C908A] dark:text-[#7D7570] text-xs">{liveMatch.minute}&apos;</span>
               )}
               <BroadcasterBadge
                 type={
@@ -71,10 +52,10 @@ export function LiveBanner() {
               <div className="flex items-center gap-3 flex-1">
                 <TeamRow team={liveMatch.teamA} score={liveMatch.scoreA} align="left" size="md" />
                 <div className="flex flex-col items-center px-2">
-                  <span className="text-xl font-bold text-white">
+                  <span className="text-xl font-bold text-[#1A1614] dark:text-[#FAF5F0]">
                     {liveMatch.scoreA ?? 0} – {liveMatch.scoreB ?? 0}
                   </span>
-                  <span className="text-[10px] text-white/40 mt-0.5">
+                  <span className="text-[10px] text-[#B5ADA7] dark:text-[#7D7570] mt-0.5">
                     {liveMatch.venue}
                   </span>
                 </div>
@@ -87,7 +68,7 @@ export function LiveBanner() {
                 href={getBroadcasterForMatch(liveMatch, settings.countryCode).broadcaster[0]?.url || '#'}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 bg-[#00E676]/20 text-[#00E676] text-sm font-semibold px-4 py-2 rounded-xl hover:bg-[#00E676]/30 transition-colors min-h-[44px]"
+                className="inline-flex items-center gap-1.5 bg-[rgba(45,139,94,0.08)] text-[#2D8B5E] text-sm font-semibold px-4 py-2 rounded-xl hover:bg-[rgba(45,139,94,0.15)] transition-colors min-h-[44px] dark:text-[#4ADE80] dark:hover:bg-[rgba(74,222,128,0.15)]"
               >
                 <Play className="size-4" />
                 Watch Free →
@@ -98,10 +79,10 @@ export function LiveBanner() {
           /* NEXT MATCH COUNTDOWN */
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
-              <span className="text-white/60 text-xs font-medium uppercase tracking-wider">
+              <span className="text-[#9C908A] dark:text-[#7D7570] text-xs font-medium uppercase tracking-wider">
                 Next Match
               </span>
-              <span className="text-white/40 text-xs">
+              <span className="text-[#B5ADA7] dark:text-[#7D7570] text-xs">
                 {getTimeUntilMatch(nextMatch.date)}
               </span>
             </div>
@@ -109,8 +90,8 @@ export function LiveBanner() {
             <div className="flex items-center justify-between gap-2">
               <TeamRow team={nextMatch.teamA} align="left" size="md" />
               <div className="flex flex-col items-center px-2">
-                <span className="text-xs text-white/40">vs</span>
-                <span className="text-[10px] text-white/40 mt-0.5">
+                <span className="text-xs text-[#B5ADA7] dark:text-[#7D7570]">vs</span>
+                <span className="text-[10px] text-[#B5ADA7] dark:text-[#7D7570] mt-0.5">
                   {nextMatch.venue}
                 </span>
               </div>
@@ -119,7 +100,7 @@ export function LiveBanner() {
 
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-1">
               <MatchCountdown targetDate={nextMatch.date} className="scale-90 sm:scale-100" />
-              <button className="inline-flex items-center gap-1.5 bg-white/10 text-white/80 text-sm font-medium px-4 py-2 rounded-xl hover:bg-white/15 transition-colors min-h-[44px]">
+              <button className="inline-flex items-center gap-1.5 bg-[#EDE8E2] text-[#6B5F57] text-sm font-medium px-4 py-2 rounded-xl hover:bg-[#E0D9D2] transition-colors min-h-[44px] dark:bg-[#3D3632] dark:text-[#A89E96] dark:hover:bg-[#4A433E]">
                 <Bell className="size-4" />
                 Set Reminder
               </button>
@@ -127,7 +108,7 @@ export function LiveBanner() {
           </div>
         ) : (
           <div className="text-center py-4">
-            <p className="text-white/40 text-sm">No upcoming matches</p>
+            <p className="text-[#B5ADA7] dark:text-[#7D7570] text-sm">No upcoming matches</p>
           </div>
         )}
       </div>

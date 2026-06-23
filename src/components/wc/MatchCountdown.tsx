@@ -24,7 +24,7 @@ function pad(n: number): string {
 function DigitBox({ value, label }: { value: string; label: string }) {
   return (
     <div className="flex flex-col items-center">
-      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center overflow-hidden">
+      <div className="bg-[#EDE8E2] dark:bg-[#3D3632] border border-[#E8E1DA] dark:border-[rgba(250,245,240,0.08)] rounded-xl w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center overflow-hidden">
         <AnimatePresence mode="popLayout">
           <motion.span
             key={value}
@@ -32,13 +32,13 @@ function DigitBox({ value, label }: { value: string; label: string }) {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 20, opacity: 0 }}
             transition={{ duration: 0.25, type: 'spring', stiffness: 300, damping: 30 }}
-            className="text-xl sm:text-2xl font-bold text-white tabular-nums"
+            className="text-xl sm:text-2xl font-bold text-[#1A1614] dark:text-[#FAF5F0] tabular-nums"
           >
             {value}
           </motion.span>
         </AnimatePresence>
       </div>
-      <span className="text-[10px] text-white/40 mt-1 uppercase tracking-wider">{label}</span>
+      <span className="text-[10px] text-[#9C908A] dark:text-[#7D7570] mt-1 uppercase tracking-wider">{label}</span>
     </div>
   );
 }
@@ -67,11 +67,11 @@ export function MatchCountdown({ targetDate, className }: MatchCountdownProps) {
   return (
     <div className={cn('flex items-center gap-2 sm:gap-3', className)}>
       <DigitBox value={pad(time.days)} label="Days" />
-      <span className="text-white/30 text-xl font-bold mt-[-18px]">:</span>
+      <span className="text-[#B5ADA7] dark:text-[#7D7570] text-xl font-bold mt-[-18px]">:</span>
       <DigitBox value={pad(time.hours)} label="Hrs" />
-      <span className="text-white/30 text-xl font-bold mt-[-18px]">:</span>
+      <span className="text-[#B5ADA7] dark:text-[#7D7570] text-xl font-bold mt-[-18px]">:</span>
       <DigitBox value={pad(time.minutes)} label="Min" />
-      <span className="text-white/30 text-xl font-bold mt-[-18px]">:</span>
+      <span className="text-[#B5ADA7] dark:text-[#7D7570] text-xl font-bold mt-[-18px]">:</span>
       <DigitBox value={pad(time.seconds)} label="Sec" />
     </div>
   );

@@ -10,15 +10,15 @@ interface BroadcasterBadgeProps {
 const badgeConfig = {
   free: {
     label: '🆓 Free',
-    className: 'bg-[#00E676]/15 text-[#00E676] border-[#00E676]/20',
+    className: 'bg-[rgba(45,139,94,0.08)] text-[#2D8B5E] border-[rgba(45,139,94,0.2)] dark:text-[#4ADE80] dark:border-[rgba(74,222,128,0.2)] dark:bg-[rgba(74,222,128,0.08)]',
   },
   cable: {
     label: '📺 Cable',
-    className: 'bg-white/10 text-white/60 border-white/10',
+    className: 'bg-[#EDE8E2] text-[#6B5F57] border-[#E8E1DA] dark:bg-[#3D3632] dark:text-[#A89E96] dark:border-[rgba(250,245,240,0.08)]',
   },
   geo_blocked: {
     label: '🔒 Geo-blocked',
-    className: 'bg-[#FF3B3B]/15 text-[#FF3B3B] border-[#FF3B3B]/20',
+    className: 'bg-[rgba(217,72,72,0.08)] text-[#D94848] border-[rgba(217,72,72,0.2)] dark:text-[#F87171] dark:border-[rgba(248,113,113,0.2)] dark:bg-[rgba(248,113,113,0.08)]',
   },
 };
 

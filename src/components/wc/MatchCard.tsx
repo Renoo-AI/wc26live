@@ -45,10 +45,12 @@ export function MatchCard({ match, isExpanded, onToggle }: MatchCardProps) {
       transition={{ duration: 0.2 }}
       className={cn(
         'rounded-2xl border overflow-hidden transition-colors',
+        'bg-white dark:bg-[#292524]',
         isLive
-          ? 'bg-[#151B2E] border-[#FF3B3B]/30 shadow-[0_0_20px_rgba(255,59,59,0.1)]'
-          : 'bg-[#151B2E]/80 border-white/5',
-        isExpanded && 'border-white/15'
+          ? 'border-l-2 border-l-[#D94848] border-t-[#E8E1DA] border-r-[#E8E1DA] border-b-[#E8E1DA] dark:border-l-[#D94848] dark:border-t-[rgba(250,245,240,0.08)] dark:border-r-[rgba(250,245,240,0.08)] dark:border-b-[rgba(250,245,240,0.08)]'
+          : 'border-[#E8E1DA] dark:border-[rgba(250,245,240,0.08)]',
+        isExpanded && 'border-[#D4CCC4] dark:border-[rgba(250,245,240,0.12)]',
+        'shadow-[0_1px_3px_rgba(26,22,20,0.04),0_1px_2px_rgba(26,22,20,0.03)]'
       )}
     >
       {/* Main clickable row */}
@@ -62,26 +64,26 @@ export function MatchCard({ match, isExpanded, onToggle }: MatchCardProps) {
           {isLive ? (
             <div className="flex items-center gap-1">
               <motion.span
-                className="w-2 h-2 rounded-full bg-[#FF3B3B]"
+                className="w-2 h-2 rounded-full bg-[#D94848]"
                 animate={{ opacity: [1, 0.3, 1] }}
                 transition={{ duration: 1.2, repeat: Infinity }}
               />
-              <span className="text-[#FF3B3B] text-xs font-bold">{match.minute ?? 0}&apos;</span>
+              <span className="text-[#D94848] text-xs font-bold">{match.minute ?? 0}&apos;</span>
             </div>
           ) : isFinished ? (
-            <span className="text-white/40 text-xs font-medium">FT</span>
+            <span className="text-[#9C908A] text-xs font-medium">FT</span>
           ) : (
-            <span className="text-white/80 text-sm font-semibold tabular-nums">
+            <span className="text-[#1A1614] dark:text-[#FAF5F0] text-sm font-semibold tabular-nums">
               {formatMatchTime(match.date, settings.timeFormat)}
             </span>
           )}
-          <span className="text-[10px] text-white/30 mt-0.5">
+          <span className="text-[10px] text-[#B5ADA7] dark:text-[#7D7570] mt-0.5">
             {getStageLabel(match.stage, match.group)}
           </span>
         </div>
 
         {/* Divider */}
-        <div className="w-px h-10 bg-white/10" />
+        <div className="w-px h-10 bg-[#E8E1DA] dark:bg-[rgba(250,245,240,0.08)]" />
 
         {/* Teams */}
         <div className="flex-1 flex flex-col gap-1.5 min-w-0">
@@ -98,7 +100,7 @@ export function MatchCard({ match, isExpanded, onToggle }: MatchCardProps) {
             animate={{ rotate: isExpanded ? 180 : 0 }}
             transition={{ duration: 0.2 }}
           >
-            <ChevronDown className="size-4 text-white/30" />
+            <ChevronDown className="size-4 text-[#B5ADA7] dark:text-[#7D7570]" />
           </motion.div>
         </div>
       </motion.button>
@@ -112,7 +114,7 @@ export function MatchCard({ match, isExpanded, onToggle }: MatchCardProps) {
             animate="expanded"
             exit="collapsed"
           >
-            <div className="border-t border-white/5">
+            <div className="border-t border-[#F0EBE5] dark:border-[rgba(250,245,240,0.06)]">
               <MatchDetail match={match} />
             </div>
           </motion.div>

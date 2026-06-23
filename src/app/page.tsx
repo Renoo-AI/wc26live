@@ -94,17 +94,17 @@ export default function Home() {
   // Hydration guard
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-[#0A0E1A] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5F0EB] dark:bg-[#1C1917] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="size-8 rounded-full border-2 border-[#00E676]/30 border-t-[#00E676] animate-spin" />
-          <span className="text-white/40 text-sm">Loading Wc26Live...</span>
+          <div className="size-8 rounded-full border-2 border-[#D97757]/30 border-t-[#D97757] animate-spin" />
+          <span className="text-[#9C908A] dark:text-[#7D7570] text-sm">Loading Wc26Live...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0E1A] flex flex-col">
+    <div className="min-h-screen bg-[#F5F0EB] dark:bg-[#1C1917] flex flex-col">
       {/* Top Navigation */}
       <TopNav />
 
@@ -138,10 +138,10 @@ export default function Home() {
                   >
                     <div className="text-4xl">⚽</div>
                     <div className="text-center">
-                      <p className="text-white/60 text-sm font-medium">
+                      <p className="text-[#6B5F57] dark:text-[#A89E96] text-sm font-medium">
                         No matches on this day
                       </p>
-                      <p className="text-white/30 text-xs mt-1">
+                      <p className="text-[#9C908A] dark:text-[#7D7570] text-xs mt-1">
                         Select another date or check the bracket for upcoming knockout matches
                       </p>
                     </div>
@@ -179,8 +179,8 @@ export default function Home() {
               className="flex flex-col gap-4 pt-2"
             >
               <div className="px-4">
-                <h2 className="text-lg font-bold text-white">Knockout Stage</h2>
-                <p className="text-xs text-white/40 mt-1">
+                <h2 className="text-lg font-bold text-[#1A1614] dark:text-[#FAF5F0]">Knockout Stage</h2>
+                <p className="text-xs text-[#9C908A] dark:text-[#7D7570] mt-1">
                   Tap a match to view broadcast details
                 </p>
               </div>

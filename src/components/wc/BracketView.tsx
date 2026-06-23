@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useSyncExternalStore } from 'react';
+import { useRef, useSyncExternalStore } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store/settings';
@@ -32,28 +32,29 @@ function BracketMatchNode({
       onClick={() => onTap?.(match.id)}
       className={cn(
         'flex flex-col items-center rounded-xl border p-2 min-w-[120px] sm:min-w-[140px] transition-colors text-left',
+        'shadow-[0_1px_3px_rgba(26,22,20,0.04),0_1px_2px_rgba(26,22,20,0.03)]',
         isGold
-          ? 'bg-[#FFD700]/5 border-[#FFD700]/30 hover:border-[#FFD700]/50'
-          : 'bg-white/5 border-white/10 hover:border-white/20'
+          ? 'bg-[rgba(196,149,58,0.08)] dark:bg-[rgba(196,149,58,0.1)] border-[rgba(196,149,58,0.3)] hover:border-[rgba(196,149,58,0.5)]'
+          : 'bg-white dark:bg-[#292524] border-[#E8E1DA] dark:border-[rgba(250,245,240,0.08)] hover:border-[#D4CCC4] dark:hover:border-[rgba(250,245,240,0.12)]'
       )}
     >
       {/* Team A */}
       <div className="flex items-center gap-1.5 w-full py-1">
         <span className="text-sm shrink-0">{match.teamA?.flag || '🏳️'}</span>
-        <span className={cn('text-[11px] truncate flex-1', hasTeams ? 'text-white/80' : 'text-white/30')}>
+        <span className={cn('text-[11px] truncate flex-1', hasTeams ? 'text-[#1A1614] dark:text-[#FAF5F0]' : 'text-[#B5ADA7] dark:text-[#7D7570]')}>
           {match.teamA?.name || 'TBD'}
         </span>
         {match.scoreA !== undefined && (
-          <span className="text-[11px] font-bold text-white/60 tabular-nums">{match.scoreA}</span>
+          <span className="text-[11px] font-bold text-[#6B5F57] dark:text-[#A89E96] tabular-nums">{match.scoreA}</span>
         )}
       </div>
 
       {/* Divider + info */}
-      <div className="w-full flex items-center gap-1.5 py-0.5 border-y border-white/5 my-0.5">
-        <span className={cn('text-[9px] font-semibold px-1.5 py-0.5 rounded', isGold ? 'bg-[#FFD700]/15 text-[#FFD700]' : 'bg-white/10 text-white/40')}>
+      <div className="w-full flex items-center gap-1.5 py-0.5 border-y border-[#F0EBE5] dark:border-[rgba(250,245,240,0.06)] my-0.5">
+        <span className={cn('text-[9px] font-semibold px-1.5 py-0.5 rounded', isGold ? 'bg-[rgba(196,149,58,0.15)] text-[#C4953A]' : 'bg-[#EDE8E2] dark:bg-[#3D3632] text-[#6B5F57] dark:text-[#A89E96]')}>
           {match.roundLabel || `Match ${match.matchNumber}`}
         </span>
-        <span className="text-[9px] text-white/30 ml-auto tabular-nums">
+        <span className="text-[9px] text-[#B5ADA7] dark:text-[#7D7570] ml-auto tabular-nums">
           {formatMatchTime(match.date, settings.timeFormat)}
         </span>
       </div>
@@ -61,11 +62,11 @@ function BracketMatchNode({
       {/* Team B */}
       <div className="flex items-center gap-1.5 w-full py-1">
         <span className="text-sm shrink-0">{match.teamB?.flag || '🏳️'}</span>
-        <span className={cn('text-[11px] truncate flex-1', hasTeams ? 'text-white/80' : 'text-white/30')}>
+        <span className={cn('text-[11px] truncate flex-1', hasTeams ? 'text-[#1A1614] dark:text-[#FAF5F0]' : 'text-[#B5ADA7] dark:text-[#7D7570]')}>
           {match.teamB?.name || 'TBD'}
         </span>
         {match.scoreB !== undefined && (
-          <span className="text-[11px] font-bold text-white/60 tabular-nums">{match.scoreB}</span>
+          <span className="text-[11px] font-bold text-[#6B5F57] dark:text-[#A89E96] tabular-nums">{match.scoreB}</span>
         )}
       </div>
     </motion.button>
@@ -87,7 +88,7 @@ function BracketRound({
     <div className="flex flex-col gap-2 shrink-0">
       <span className={cn(
         'text-[10px] font-bold uppercase tracking-wider text-center mb-1',
-        isGold ? 'text-[#FFD700]' : 'text-white/40'
+        isGold ? 'text-[#C4953A]' : 'text-[#9C908A] dark:text-[#7D7570]'
       )}>
         {title}
       </span>
@@ -103,13 +104,13 @@ function BracketRound({
 function Connector({ isGold }: { isGold?: boolean }) {
   return (
     <div className="flex items-center justify-center shrink-0 px-1 sm:px-2">
-      <svg width="32" height="100%" className="text-white/10" preserveAspectRatio="none" style={{ minHeight: '60px' }}>
+      <svg width="32" height="100%" preserveAspectRatio="none" style={{ minHeight: '60px' }}>
         <line
           x1="0"
           y1="50%"
           x2="16"
           y2="50%"
-          stroke="currentColor"
+          stroke={isGold ? '#C4953A' : '#D4CCC4'}
           strokeWidth="1"
           strokeDasharray={isGold ? undefined : '4 4'}
         />
@@ -118,7 +119,7 @@ function Connector({ isGold }: { isGold?: boolean }) {
           y1="25%"
           x2="16"
           y2="75%"
-          stroke="currentColor"
+          stroke={isGold ? '#C4953A' : '#D4CCC4'}
           strokeWidth="1"
           strokeDasharray={isGold ? undefined : '4 4'}
         />
@@ -127,7 +128,7 @@ function Connector({ isGold }: { isGold?: boolean }) {
           y1="25%"
           x2="32"
           y2="25%"
-          stroke="currentColor"
+          stroke={isGold ? '#C4953A' : '#D4CCC4'}
           strokeWidth="1"
           strokeDasharray={isGold ? undefined : '4 4'}
         />
@@ -136,7 +137,7 @@ function Connector({ isGold }: { isGold?: boolean }) {
           y1="75%"
           x2="32"
           y2="75%"
-          stroke="currentColor"
+          stroke={isGold ? '#C4953A' : '#D4CCC4'}
           strokeWidth="1"
           strokeDasharray={isGold ? undefined : '4 4'}
         />
@@ -200,7 +201,7 @@ export function BracketView() {
             )}
             {final_ && (
               <div className="relative">
-                <div className="absolute -inset-1 bg-[#FFD700]/10 rounded-2xl blur-md" />
+                <div className="absolute -inset-1 bg-[rgba(196,149,58,0.06)] dark:bg-[rgba(196,149,58,0.08)] rounded-2xl" />
                 <BracketMatchNode match={final_} isGold onTap={handleMatchTap} />
               </div>
             )}
@@ -208,8 +209,8 @@ export function BracketView() {
         </div>
       </div>
       {/* Fade edges for mobile scroll hint */}
-      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-[#0A0E1A] to-transparent" />
-      <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-[#0A0E1A] to-transparent" />
+      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-[#F5F0EB] dark:from-[#1C1917] to-transparent" />
+      <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-[#F5F0EB] dark:from-[#1C1917] to-transparent" />
     </div>
   );
 }

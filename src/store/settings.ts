@@ -29,7 +29,7 @@ export const useAppStore = create<AppState>()(
         countryName: 'United States',
         flag: '🇺🇸',
         timeFormat: '24h',
-        theme: 'dark',
+        theme: 'light',
         notifications: {
           matchStart: true,
           thirtyMinBefore: true,
