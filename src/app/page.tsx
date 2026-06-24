@@ -10,9 +10,10 @@ import { MatchCard } from '@/components/wc/MatchCard';
 import { MatchSkeletonList } from '@/components/wc/MatchSkeleton';
 import { BracketView } from '@/components/wc/BracketView';
 import { SettingsPanel } from '@/components/wc/SettingsPanel';
+import { AdminPanel } from '@/components/wc/AdminPanel';
 import { BottomNav } from '@/components/wc/BottomNav';
 import { Disclaimer } from '@/components/wc/Disclaimer';
-import { getMatchesByDate, getLiveMatches, allMatches, getAllMatchDates } from '@/data/matches';
+import { getMatchesByDate, getLiveMatches, allMatches, getAllMatchDates, setGlobalOverrides } from '@/data/matches';
 import { cn } from '@/lib/utils';
 
 const pageVariants = {
@@ -31,6 +32,8 @@ export default function Home() {
     setExpandedMatchId,
     settings,
     setSettings,
+    isAdmin,
+    matchOverrides,
   } = useAppStore();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -62,6 +65,11 @@ export default function Home() {
     detectCountry();
   }, [setSettings]);
 
+  // Sync admin overrides to matches module
+  useEffect(() => {
+    setGlobalOverrides(matchOverrides);
+  }, [matchOverrides]);
+
   // Auto-select first date if none selected
   const allDates = useMemo(() => getAllMatchDates(), []);
   const effectiveDate = selectedDate || allDates[0] || '';
@@ -82,7 +90,7 @@ export default function Home() {
       if (aLive !== bLive) return aLive - bLive;
       return a.date.localeCompare(b.date);
     });
-  }, [dateMatches]);
+  }, [dateMatches, matchOverrides]);
 
   // Apply theme class
   useEffect(() => {
@@ -122,6 +130,9 @@ export default function Home() {
             >
               {/* Live Banner */}
               <LiveBanner />
+
+              {/* Admin Panel */}
+              {isAdmin && <AdminPanel />}
 
               {/* Date Selector */}
               <DatePillSelector />

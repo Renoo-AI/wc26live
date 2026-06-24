@@ -60,3 +60,10 @@ export interface UserSettings {
 }
 
 export type TabType = 'matches' | 'bracket' | 'settings';
+
+export interface MatchOverride {
+  status?: MatchStatus;
+  scoreA?: number;
+  scoreB?: number;
+  minute?: number;
+}

@@ -1,4 +1,4 @@
-import { Match, Stage } from './types';
+import { Match, Stage, MatchOverride } from './types';
 import { teams } from './teams';
 
 const t = teams;
@@ -144,34 +144,58 @@ knockoutStages.forEach((ks) => {
 
 export const allMatches: Match[] = matches;
 
+// Global overrides reference — set via setGlobalOverrides() from the store
+let globalOverrides: Record<string, MatchOverride> = {};
+
+export function setGlobalOverrides(overrides: Record<string, MatchOverride>) {
+  globalOverrides = overrides || {};
+}
+
+function applyOverrides(match: Match): Match {
+  const override = globalOverrides[match.id];
+  if (!override) return match;
+  return {
+    ...match,
+    status: override.status ?? match.status,
+    scoreA: override.scoreA ?? match.scoreA,
+    scoreB: override.scoreB ?? match.scoreB,
+    minute: override.minute ?? match.minute,
+  };
+}
+
 export function getMatchesByDate(dateStr: string): Match[] {
-  return allMatches.filter((m) => m.date.slice(0, 10) === dateStr);
+  return allMatches.map(applyOverrides).filter((m) => m.date.slice(0, 10) === dateStr);
 }
 
 export function getMatchesByStage(stage: Stage): Match[] {
-  return allMatches.filter((m) => m.stage === stage);
+  return allMatches.map(applyOverrides).filter((m) => m.stage === stage);
 }
 
 export function getMatchById(id: string): Match | undefined {
-  return allMatches.find((m) => m.id === id);
+  const m = allMatches.find((m) => m.id === id);
+  return m ? applyOverrides(m) : undefined;
 }
 
 export function getGroupMatches(group: string): Match[] {
-  return allMatches.filter((m) => m.group === group);
+  return allMatches.map(applyOverrides).filter((m) => m.group === group);
 }
 
 export function getUpcomingMatches(): Match[] {
   const now = new Date();
-  return allMatches.filter((m) => new Date(m.date) > now).sort((a, b) => a.date.localeCompare(b.date));
+  return allMatches.map(applyOverrides).filter((m) => new Date(m.date) > now && m.status !== 'live').sort((a, b) => a.date.localeCompare(b.date));
 }
 
 export function getLiveMatches(): Match[] {
-  return allMatches.filter((m) => m.status === 'live');
+  return allMatches.map(applyOverrides).filter((m) => m.status === 'live');
 }
 
 export function getAllMatchDates(): string[] {
   const dates = new Set(allMatches.map((m) => m.date.slice(0, 10)));
   return Array.from(dates).sort();
+}
+
+export function getAllMatchesWithOverrides(): Match[] {
+  return allMatches.map(applyOverrides);
 }
 
 export function getRoundOf16Matches(): Match[] { return getMatchesByStage('round_of_16'); }
