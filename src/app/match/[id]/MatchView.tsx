@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Share2, Play, Maximize, Minimize, Volume2, VolumeX, Radio, Loader2 } from 'lucide-react';
+import { ArrowLeft, Share2, Play, Maximize, Minimize, Volume2, VolumeX, Bell, Loader2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store/settings';
 import { getMatchById, setGlobalOverrides } from '@/data/matches';
 import { formatMatchTime, getStageLabel } from '@/lib/match-utils';
+import { requestNotificationPermission, hasNotificationPermission } from '@/lib/notifications';
 import type { Match } from '@/data/types';
 
 function getStreamUrl(): string | null {
@@ -43,6 +44,10 @@ export function MatchView({ matchId }: { matchId: string }) {
     } else {
       await navigator.clipboard.writeText(url);
     }
+  }
+
+  async function handleReminder() {
+    await requestNotificationPermission();
   }
 
   if (!mounted || !match) return null;
@@ -194,7 +199,7 @@ export function MatchView({ matchId }: { matchId: string }) {
 
           {/* Action buttons */}
           <div className="flex gap-2">
-            {isLive && (
+            {isLive ? (
               <>
                 <motion.a
                   whileTap={{ scale: 0.97 }}
@@ -215,15 +220,28 @@ export function MatchView({ matchId }: { matchId: string }) {
                   Share
                 </motion.button>
               </>
+            ) : isFinished ? (
+              <div className="flex-1 text-center py-3">
+                <span className="text-white/40 text-sm">Broadcast has ended</span>
+              </div>
+            ) : (
+              /* Upcoming — REMINDER only, no Watch */
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={handleReminder}
+                className="flex-1 flex items-center justify-center gap-2 bg-[#D97757] text-white font-semibold text-sm px-4 py-3 rounded-xl hover:bg-[#C66A4A] transition-colors min-h-[48px]"
+              >
+                <Bell className="size-4" />
+                Set Reminder
+              </motion.button>
             )}
             {!isLive && !isFinished && (
               <motion.button
                 whileTap={{ scale: 0.97 }}
                 onClick={handleShare}
-                className="flex-1 flex items-center justify-center gap-2 bg-[#D97757] text-white font-semibold text-sm px-4 py-3 rounded-xl hover:bg-[#C66A4A] transition-colors min-h-[48px]"
+                className="flex items-center justify-center gap-2 bg-white/10 text-white font-semibold text-sm px-4 py-3 rounded-xl hover:bg-white/15 transition-colors min-h-[48px]"
               >
                 <Share2 className="size-4" />
-                Share Match
               </motion.button>
             )}
           </div>
