@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Play, Flag, Clock, Plus, Minus, ArrowLeft, Key, Lock, ChevronDown } from 'lucide-react';
+import { Shield, Play, Flag, Clock, Plus, Minus, ArrowLeft, Key, Lock, ChevronDown, Bell, BellRing } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store/settings';
-import { allMatches, getLiveMatches, setGlobalOverrides } from '@/data/matches';
+import { allMatches, setGlobalOverrides } from '@/data/matches';
 import { formatMatchTime, getStageLabel } from '@/lib/match-utils';
+import { requestNotificationPermission, hasNotificationPermission, notifyMatchLive, notifyMatchFinished, notifyGoal } from '@/lib/notifications';
 import type { Match } from '@/data/types';
 
 function getPasskey(): string {
@@ -36,21 +37,30 @@ export default function AdminPage() {
   const [passcode, setPasscode] = useState('');
   const [error, setError] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [notifyEnabled, setNotifyEnabled] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    // Check if already authenticated this session
     const authed = sessionStorage.getItem('wc26live-admin-auth');
     if (authed === 'true') setAuthenticated(true);
+    // Check notification permission status
+    setNotifyEnabled(hasNotificationPermission());
   }, []);
 
-  // Sync overrides to matches module so getLiveMatches() works
+  // Sync overrides to matches module for main page
   useEffect(() => {
     setGlobalOverrides(matchOverrides);
   }, [matchOverrides]);
 
-  const liveMatches = getLiveMatches();
-  const liveMatch = liveMatches[0] || null;
+  // Derive live match DIRECTLY from store (not getLiveMatches which reads stale module state)
+  const liveMatch = useMemo(() => {
+    return (
+      allMatches.find((m) => {
+        const o = matchOverrides[m.id];
+        return (o?.status ?? m.status) === 'live';
+      }) || null
+    );
+  }, [matchOverrides]);
 
   const upcomingMatches = useMemo(
     () =>
@@ -103,7 +113,13 @@ export default function AdminPage() {
     setPickerOpen(false);
   }
 
-  function handleSetLive(match: Match) {
+  async function handleSetLive(match: Match) {
+    // Request notification permission on first live start
+    if (!hasNotificationPermission()) {
+      const granted = await requestNotificationPermission();
+      setNotifyEnabled(granted);
+    }
+
     const currentLive = allMatches.find((m) => {
       const override = matchOverrides[m.id];
       return (override?.status ?? m.status) === 'live';
@@ -113,6 +129,12 @@ export default function AdminPage() {
     }
     setMatchOverride(match.id, { status: 'live', scoreA: 0, scoreB: 0, minute: 1 });
     setPickerOpen(false);
+
+    // Notify!
+    notifyMatchLive(
+      match.teamA?.name ?? 'Team A',
+      match.teamB?.name ?? 'Team B'
+    );
   }
 
   function handleUpdateScore(matchId: string, team: 'A' | 'B', delta: number) {
@@ -120,6 +142,15 @@ export default function AdminPage() {
     const currentScore = team === 'A' ? (override.scoreA ?? 0) : (override.scoreB ?? 0);
     const newScore = Math.max(0, currentScore + delta);
     setMatchOverride(matchId, { ...override, [team === 'A' ? 'scoreA' : 'scoreB']: newScore });
+
+    // Notify on goal (+1)
+    if (delta > 0) {
+      const match = allMatches.find((m) => m.id === matchId);
+      const teamName = team === 'A' ? match?.teamA?.name : match?.teamB?.name;
+      const scoreA = team === 'A' ? newScore : (override.scoreA ?? 0);
+      const scoreB = team === 'B' ? newScore : (override.scoreB ?? 0);
+      notifyGoal(teamName ?? 'Unknown', scoreA, scoreB);
+    }
   }
 
   function handleUpdateMinute(matchId: string, delta: number) {
@@ -131,6 +162,15 @@ export default function AdminPage() {
   function handleEndMatch(matchId: string) {
     const override = matchOverrides[matchId] || {};
     setMatchOverride(matchId, { ...override, status: 'finished' });
+
+    // Notify full time
+    const match = allMatches.find((m) => m.id === matchId);
+    notifyMatchFinished(
+      match?.teamA?.name ?? 'Team A',
+      match?.teamB?.name ?? 'Team B',
+      override.scoreA ?? 0,
+      override.scoreB ?? 0
+    );
   }
 
   function handleResetMatch(matchId: string) {
@@ -252,6 +292,25 @@ export default function AdminPage() {
           <span className="text-sm text-[#9C908A] dark:text-[#7D7570]">Back to app</span>
         </a>
         <div className="flex items-center gap-3">
+          <button
+            onClick={async () => {
+              if (notifyEnabled) {
+                setNotifyEnabled(false);
+              } else {
+                const granted = await requestNotificationPermission();
+                setNotifyEnabled(granted);
+              }
+            }}
+            className={cn(
+              'text-xs font-medium transition-colors',
+              notifyEnabled
+                ? 'text-[#2D8B5E] dark:text-[#4ADE80]'
+                : 'text-[#9C908A] dark:text-[#7D7570] hover:text-[#D97757]'
+            )}
+            title={notifyEnabled ? 'Notifications ON' : 'Enable notifications'}
+          >
+            {notifyEnabled ? <BellRing className="size-4" /> : <Bell className="size-4" />}
+          </button>
           <span className="text-xs text-[#B5ADA7] dark:text-[#7D7570] tabular-nums">
             {getPasskey()}
           </span>
