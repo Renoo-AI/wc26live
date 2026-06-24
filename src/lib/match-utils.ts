@@ -9,10 +9,13 @@ export function formatMatchTime(
 ): string {
   const date = parseISO(isoDate);
   const fmt = timeFormat === '12h' ? 'h:mm a' : 'HH:mm';
-  if (timeZone) {
-    return format(date, fmt, { timeZone });
+  // Always show CET since match times are scheduled in CET
+  const tz = timeZone || 'Europe/Paris'; // CET/CEST
+  try {
+    return format(date, fmt, { timeZone: tz });
+  } catch {
+    return format(date, fmt);
   }
-  return format(date, fmt);
 }
 
 export function formatMatchDate(isoDate: string, timeZone?: string): string {
