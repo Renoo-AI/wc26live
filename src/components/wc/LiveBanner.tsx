@@ -1,21 +1,29 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Bell, Play } from 'lucide-react';
+import { Bell, BellRing, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store/settings';
 import { getLiveMatches, getUpcomingMatches } from '@/data/matches';
 import { formatMatchTime, getTimeUntilMatch, getBroadcasterForMatch } from '@/lib/match-utils';
+import { requestNotificationPermission, hasNotificationPermission } from '@/lib/notifications';
 import { TeamRow } from './TeamRow';
 import { MatchCountdown } from './MatchCountdown';
 import { BroadcasterBadge } from './BroadcasterBadge';
 
 export function LiveBanner() {
   const { settings } = useAppStore();
+  const [notifyOn, setNotifyOn] = useState(hasNotificationPermission());
   const liveMatches = getLiveMatches();
   const upcomingMatches = getUpcomingMatches();
   const liveMatch = liveMatches[0] || null;
   const nextMatch = upcomingMatches[0] || null;
+
+  async function handleReminder() {
+    const granted = await requestNotificationPermission();
+    setNotifyOn(granted);
+  }
 
   return (
     <motion.div
@@ -100,9 +108,17 @@ export function LiveBanner() {
 
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-1">
               <MatchCountdown targetDate={nextMatch.date} className="scale-90 sm:scale-100" />
-              <button className="inline-flex items-center gap-1.5 bg-[#EDE8E2] text-[#6B5F57] text-sm font-medium px-4 py-2 rounded-xl hover:bg-[#E0D9D2] transition-colors min-h-[44px] dark:bg-[#3D3632] dark:text-[#A89E96] dark:hover:bg-[#4A433E]">
-                <Bell className="size-4" />
-                Set Reminder
+              <button
+                onClick={handleReminder}
+                className={cn(
+                  'inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl transition-colors min-h-[44px]',
+                  notifyOn
+                    ? 'bg-[rgba(45,139,94,0.08)] text-[#2D8B5E] dark:text-[#4ADE80]'
+                    : 'bg-[#EDE8E2] text-[#6B5F57] hover:bg-[#E0D9D2] dark:bg-[#3D3632] dark:text-[#A89E96] dark:hover:bg-[#4A433E]'
+                )}
+              >
+                {notifyOn ? <BellRing className="size-4" /> : <Bell className="size-4" />}
+                {notifyOn ? 'Reminder Set' : 'Set Reminder'}
               </button>
             </div>
           </div>

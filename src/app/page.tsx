@@ -12,7 +12,8 @@ import { BracketView } from '@/components/wc/BracketView';
 import { SettingsPanel } from '@/components/wc/SettingsPanel';
 import { BottomNav } from '@/components/wc/BottomNav';
 import { Disclaimer } from '@/components/wc/Disclaimer';
-import { getMatchesByDate, getLiveMatches, allMatches, getAllMatchDates, setGlobalOverrides } from '@/data/matches';
+import { getMatchesByDate, getLiveMatches, allMatches, getAllMatchDates, getUpcomingMatches, setGlobalOverrides } from '@/data/matches';
+import { checkAndNotifyMatches, requestNotificationPermission, hasNotificationPermission } from '@/lib/notifications';
 import { cn } from '@/lib/utils';
 
 const pageVariants = {
@@ -67,6 +68,25 @@ export default function Home() {
   useEffect(() => {
     setGlobalOverrides(matchOverrides);
   }, [matchOverrides]);
+
+  // Auto-notification polling (checks every 30s for upcoming match times)
+  useEffect(() => {
+    // Request permission on first load
+    if (!hasNotificationPermission()) {
+      requestNotificationPermission();
+    }
+
+    const interval = setInterval(() => {
+      const upcoming = getUpcomingMatches();
+      checkAndNotifyMatches(upcoming, settings.notifications);
+    }, 30000); // every 30 seconds
+
+    // Run once immediately
+    const upcoming = getUpcomingMatches();
+    checkAndNotifyMatches(upcoming, settings.notifications);
+
+    return () => clearInterval(interval);
+  }, [settings.notifications]);
 
   // Auto-select first date if none selected
   const allDates = useMemo(() => getAllMatchDates(), []);
