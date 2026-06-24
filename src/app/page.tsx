@@ -12,8 +12,10 @@ import { BracketView } from '@/components/wc/BracketView';
 import { SettingsPanel } from '@/components/wc/SettingsPanel';
 import { BottomNav } from '@/components/wc/BottomNav';
 import { Disclaimer } from '@/components/wc/Disclaimer';
+import { BroadcastEnded } from '@/components/wc/BroadcastEnded';
 import { getMatchesByDate, getLiveMatches, allMatches, getAllMatchDates, getUpcomingMatches, setGlobalOverrides } from '@/data/matches';
 import { checkAndNotifyMatches, requestNotificationPermission, hasNotificationPermission } from '@/lib/notifications';
+import { useMatchSync } from '@/lib/useMatchSync';
 import { cn } from '@/lib/utils';
 
 const pageVariants = {
@@ -34,6 +36,7 @@ export default function Home() {
     setSettings,
     matchOverrides,
   } = useAppStore();
+  const { broadcastMessage, clearBroadcastMessage } = useMatchSync();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -148,6 +151,14 @@ export default function Home() {
             >
               {/* Live Banner */}
               <LiveBanner />
+
+              {/* Broadcast Ended (shown when admin ends broadcast) */}
+              {broadcastMessage && (
+                <BroadcastEnded
+                  message={broadcastMessage}
+                  onDismiss={clearBroadcastMessage}
+                />
+              )}
 
               {/* Date Selector */}
               <DatePillSelector />

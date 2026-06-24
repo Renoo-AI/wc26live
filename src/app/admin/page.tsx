@@ -8,6 +8,7 @@ import { useAppStore } from '@/store/settings';
 import { allMatches, setGlobalOverrides } from '@/data/matches';
 import { formatMatchTime, getStageLabel } from '@/lib/match-utils';
 import { requestNotificationPermission, hasNotificationPermission, notifyMatchLive, notifyMatchFinished, notifyGoal } from '@/lib/notifications';
+import { useMatchSync } from '@/lib/useMatchSync';
 import type { Match } from '@/data/types';
 
 function getPasskey(): string {
@@ -32,6 +33,7 @@ function isValidPasskey(input: string): boolean {
 
 export default function AdminPage() {
   const { settings, matchOverrides, setMatchOverride, removeMatchOverride } = useAppStore();
+  const { synced, broadcastMatch, broadcastScore, endBroadcast } = useMatchSync();
   const [mounted, setMounted] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [passcode, setPasscode] = useState('');
@@ -120,14 +122,15 @@ export default function AdminPage() {
       setNotifyEnabled(granted);
     }
 
-    const currentLive = allMatches.find((m) => {
-      const override = matchOverrides[m.id];
-      return (override?.status ?? m.status) === 'live';
+    // Broadcast to all tabs via BroadcastChannel
+    broadcastMatch({
+      matchId: match.id,
+      status: 'live',
+      scoreA: 0,
+      scoreB: 0,
+      minute: 1,
     });
-    if (currentLive) {
-      removeMatchOverride(currentLive.id);
-    }
-    setMatchOverride(match.id, { status: 'live', scoreA: 0, scoreB: 0, minute: 1 });
+
     setPickerOpen(false);
 
     // Notify!
@@ -141,14 +144,16 @@ export default function AdminPage() {
     const override = matchOverrides[matchId] || {};
     const currentScore = team === 'A' ? (override.scoreA ?? 0) : (override.scoreB ?? 0);
     const newScore = Math.max(0, currentScore + delta);
-    setMatchOverride(matchId, { ...override, [team === 'A' ? 'scoreA' : 'scoreB']: newScore });
+    const scoreA = team === 'A' ? newScore : (override.scoreA ?? 0);
+    const scoreB = team === 'B' ? newScore : (override.scoreB ?? 0);
+
+    // Broadcast to all tabs
+    broadcastScore(matchId, scoreA, scoreB, override.minute ?? 0);
 
     // Notify on goal (+1)
     if (delta > 0) {
       const match = allMatches.find((m) => m.id === matchId);
       const teamName = team === 'A' ? match?.teamA?.name : match?.teamB?.name;
-      const scoreA = team === 'A' ? newScore : (override.scoreA ?? 0);
-      const scoreB = team === 'B' ? newScore : (override.scoreB ?? 0);
       notifyGoal(teamName ?? 'Unknown', scoreA, scoreB);
     }
   }
@@ -156,21 +161,31 @@ export default function AdminPage() {
   function handleUpdateMinute(matchId: string, delta: number) {
     const override = matchOverrides[matchId] || {};
     const newMinute = Math.max(0, (override.minute ?? 0) + delta);
-    setMatchOverride(matchId, { ...override, minute: newMinute });
+    broadcastScore(matchId, override.scoreA ?? 0, override.scoreB ?? 0, newMinute);
   }
 
   function handleEndMatch(matchId: string) {
     const override = matchOverrides[matchId] || {};
-    setMatchOverride(matchId, { ...override, status: 'finished' });
+    const scoreA = override.scoreA ?? 0;
+    const scoreB = override.scoreB ?? 0;
+
+    // Final score update
+    broadcastMatch({
+      matchId,
+      status: 'finished',
+      scoreA,
+      scoreB,
+      minute: 90,
+    });
+
+    // End broadcast (shows excuse to viewers)
+    const match = allMatches.find((m) => m.id === matchId);
+    const teamA = match?.teamA?.name ?? 'Team A';
+    const teamB = match?.teamB?.name ?? 'Team B';
+    endBroadcast(`Broadcast has ended. ${teamA} ${scoreA} – ${scoreB} ${teamB}. Thanks for watching on Wc26Live!`);
 
     // Notify full time
-    const match = allMatches.find((m) => m.id === matchId);
-    notifyMatchFinished(
-      match?.teamA?.name ?? 'Team A',
-      match?.teamB?.name ?? 'Team B',
-      override.scoreA ?? 0,
-      override.scoreB ?? 0
-    );
+    notifyMatchFinished(teamA, teamB, scoreA, scoreB);
   }
 
   function handleResetMatch(matchId: string) {
