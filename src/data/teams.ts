@@ -71,6 +71,13 @@ export const teams: Record<string, Team> = {
   COD: { code: 'COD', name: 'DR Congo', flag: '🇨🇩', group: 'H' },
   MLI: { code: 'MLI', name: 'Mali', flag: '🇲🇱', group: 'I' },
   ZAM: { code: 'ZAM', name: 'Zambia', flag: '🇿🇲', group: 'J' },
+
+  // Additional teams
+  JOR: { code: 'JOR', name: 'Jordan', flag: '🇯🇴' },
+  IRQ: { code: 'IRQ', name: 'Iraq', flag: '🇮🇶' },
+  HAI: { code: 'HAI', name: 'Haiti', flag: '🇭🇹' },
+  BIH: { code: 'BIH', name: 'Bosnia-Herzegovina', flag: '🇧🇦' },
+  CPV: { code: 'CPV', name: 'Cape Verde', flag: '🇨🇻' },
 };
 
 export function getTeam(code: string): Team | undefined {

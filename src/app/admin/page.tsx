@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, Play, Flag, Clock, Plus, Minus, ArrowLeft, Key, Lock, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store/settings';
-import { allMatches, getLiveMatches } from '@/data/matches';
+import { allMatches, getLiveMatches, setGlobalOverrides } from '@/data/matches';
 import { formatMatchTime, getStageLabel } from '@/lib/match-utils';
 import type { Match } from '@/data/types';
 
@@ -43,6 +43,11 @@ export default function AdminPage() {
     const authed = sessionStorage.getItem('wc26live-admin-auth');
     if (authed === 'true') setAuthenticated(true);
   }, []);
+
+  // Sync overrides to matches module so getLiveMatches() works
+  useEffect(() => {
+    setGlobalOverrides(matchOverrides);
+  }, [matchOverrides]);
 
   const liveMatches = getLiveMatches();
   const liveMatch = liveMatches[0] || null;
