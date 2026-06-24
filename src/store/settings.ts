@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { UserSettings, TabType, MatchOverride } from '@/data/types';
+import { UserSettings, TabType, MatchOverride, Match } from '@/data/types';
 
 interface AppState {
   activeTab: TabType;
@@ -19,6 +19,11 @@ interface AppState {
   matchOverrides: Record<string, MatchOverride>;
   setMatchOverride: (matchId: string, override: MatchOverride) => void;
   removeMatchOverride: (matchId: string) => void;
+  // Custom matches
+  customMatches: Match[];
+  addCustomMatch: (match: Match) => void;
+  updateCustomMatch: (matchId: string, match: Partial<Match>) => void;
+  removeCustomMatch: (matchId: string) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -64,6 +69,22 @@ export const useAppStore = create<AppState>()(
           const { [matchId]: _, ...rest } = state.matchOverrides;
           return { matchOverrides: rest };
         }),
+      // Custom matches
+      customMatches: [],
+      addCustomMatch: (match) =>
+        set((state) => ({
+          customMatches: [...state.customMatches, match],
+        })),
+      updateCustomMatch: (matchId, data) =>
+        set((state) => ({
+          customMatches: state.customMatches.map((m) =>
+            m.id === matchId ? { ...m, ...data } : m
+          ),
+        })),
+      removeCustomMatch: (matchId) =>
+        set((state) => ({
+          customMatches: state.customMatches.filter((m) => m.id !== matchId),
+        })),
     }),
     {
       name: 'wc26live-settings',
@@ -71,6 +92,7 @@ export const useAppStore = create<AppState>()(
         settings: state.settings,
         matchOverrides: state.matchOverrides,
         isAdmin: state.isAdmin,
+        customMatches: state.customMatches,
       }),
     }
   )

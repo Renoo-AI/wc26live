@@ -2,14 +2,18 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Play, Flag, Clock, Plus, Minus, ArrowLeft, Key, Lock, ChevronDown, Bell, BellRing } from 'lucide-react';
+import { Shield, Play, Flag, Clock, Plus, Minus, ArrowLeft, Key, Lock, ChevronDown, Bell, BellRing, PlusCircle, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store/settings';
-import { allMatches, setGlobalOverrides } from '@/data/matches';
+import { allMatches, getAllMatches, setGlobalOverrides, setGlobalCustomMatches } from '@/data/matches';
 import { formatMatchTime, getStageLabel } from '@/lib/match-utils';
 import { requestNotificationPermission, hasNotificationPermission, notifyMatchLive, notifyMatchFinished, notifyGoal } from '@/lib/notifications';
 import { useMatchSync } from '@/lib/useMatchSync';
 import type { Match } from '@/data/types';
+
+function uid(): string {
+  return 'custom_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
 
 function getPasskey(): string {
   const now = new Date();
@@ -32,7 +36,7 @@ function isValidPasskey(input: string): boolean {
 }
 
 export default function AdminPage() {
-  const { settings, matchOverrides, setMatchOverride, removeMatchOverride } = useAppStore();
+  const { settings, matchOverrides, setMatchOverride, removeMatchOverride, customMatches, addCustomMatch, removeCustomMatch } = useAppStore();
   const { synced, broadcastMatch, broadcastScore, endBroadcast } = useMatchSync();
   const [mounted, setMounted] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
@@ -40,6 +44,8 @@ export default function AdminPage() {
   const [error, setError] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [notifyEnabled, setNotifyEnabled] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const [newMatch, setNewMatch] = useState({ teamA: '', teamB: '', date: '', time: '', venue: 'Stadium', city: 'TBD' });
 
   useEffect(() => {
     setMounted(true);
@@ -49,24 +55,26 @@ export default function AdminPage() {
     setNotifyEnabled(hasNotificationPermission());
   }, []);
 
-  // Sync overrides to matches module for main page
+  // Sync overrides + custom matches to matches module for main page
   useEffect(() => {
     setGlobalOverrides(matchOverrides);
-  }, [matchOverrides]);
+    setGlobalCustomMatches(customMatches);
+  }, [matchOverrides, customMatches]);
 
   // Derive live match DIRECTLY from store (not getLiveMatches which reads stale module state)
+  const allM = useMemo(() => getAllMatches(), [customMatches]);
   const liveMatch = useMemo(() => {
     return (
-      allMatches.find((m) => {
+      allM.find((m) => {
         const o = matchOverrides[m.id];
         return (o?.status ?? m.status) === 'live';
       }) || null
     );
-  }, [matchOverrides]);
+  }, [matchOverrides, allM]);
 
   const upcomingMatches = useMemo(
     () =>
-      allMatches
+      allM
         .filter((m) => {
           const override = matchOverrides[m.id];
           const status = override?.status ?? m.status;
@@ -74,7 +82,7 @@ export default function AdminPage() {
         })
         .sort((a, b) => a.date.localeCompare(b.date))
         .slice(0, 30),
-    [matchOverrides]
+    [matchOverrides, allM]
   );
 
   function handleDigit(d: string) {
@@ -152,7 +160,7 @@ export default function AdminPage() {
 
     // Notify on goal (+1)
     if (delta > 0) {
-      const match = allMatches.find((m) => m.id === matchId);
+      const match = getAllMatches().find((m) => m.id === matchId);
       const teamName = team === 'A' ? match?.teamA?.name : match?.teamB?.name;
       notifyGoal(teamName ?? 'Unknown', scoreA, scoreB);
     }
@@ -179,7 +187,7 @@ export default function AdminPage() {
     });
 
     // End broadcast (shows excuse to viewers)
-    const match = allMatches.find((m) => m.id === matchId);
+    const match = getAllMatches().find((m) => m.id === matchId);
     const teamA = match?.teamA?.name ?? 'Team A';
     const teamB = match?.teamB?.name ?? 'Team B';
     endBroadcast(`Broadcast has ended. ${teamA} ${scoreA} – ${scoreB} ${teamB}. Thanks for watching on Wc26Live!`);
@@ -190,6 +198,34 @@ export default function AdminPage() {
 
   function handleResetMatch(matchId: string) {
     removeMatchOverride(matchId);
+  }
+
+  function handleAddMatch() {
+    const { teamA, teamB, date, time, venue, city } = newMatch;
+    if (!teamA || !teamB || !date || !time) return;
+
+    // Find team codes or use placeholder flags
+    const teamACode = teamA.toUpperCase().slice(0, 3);
+    const teamBCode = teamB.toUpperCase().slice(0, 3);
+
+    const isoDate = new Date(`${date}T${time}:00+02:00`).toISOString(); // CET = +02:00 in June
+
+    const match: Match = {
+      id: uid(),
+      stage: 'round_of_16',
+      roundLabel: 'Custom',
+      matchNumber: 0,
+      date: isoDate,
+      venue: venue || 'Stadium',
+      city: city || 'TBD',
+      teamA: { code: teamACode, name: teamA, flag: '🏳️' },
+      teamB: { code: teamBCode, name: teamB, flag: '🏳️' },
+      status: 'upcoming',
+    };
+
+    addCustomMatch(match);
+    setNewMatch({ teamA: '', teamB: '', date: '', time: '', venue: 'Stadium', city: 'TBD' });
+    setAddOpen(false);
   }
 
   if (!mounted) return null;
@@ -532,6 +568,107 @@ export default function AdminPage() {
             )}
           </section>
         )}
+
+        {/* ── Add Custom Match ────────────────────────────── */}
+        <section className="bg-white dark:bg-[#292524] border border-[rgba(45,139,94,0.25)] dark:border-[rgba(74,222,128,0.2)] rounded-2xl p-4 shadow-[0_1px_3px_rgba(26,22,20,0.04)]">
+          <button
+            onClick={() => setAddOpen(!addOpen)}
+            className="w-full flex items-center justify-between"
+          >
+            <div className="flex items-center gap-2">
+              <PlusCircle className="size-4 text-[#2D8B5E] dark:text-[#4ADE80]" />
+              <span className="text-sm font-semibold text-[#2D8B5E] dark:text-[#4ADE80]">Add Match</span>
+              {customMatches.length > 0 && (
+                <span className="text-[10px] text-[#9C908A] dark:text-[#7D7570]">({customMatches.length} custom)</span>
+              )}
+            </div>
+            <ChevronDown className={cn('size-4 text-[#9C908A] transition-transform', addOpen && 'rotate-180')} />
+          </button>
+
+          {addOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              className="overflow-hidden"
+            >
+              <div className="pt-3 flex flex-col gap-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-[#9C908A] dark:text-[#7D7570]">Team A</label>
+                    <input
+                      type="text"
+                      value={newMatch.teamA}
+                      onChange={(e) => setNewMatch({ ...newMatch, teamA: e.target.value })}
+                      placeholder="Brazil"
+                      className="w-full text-sm bg-[#FAF8F5] dark:bg-[#3D3632] border border-[#E8E1DA] dark:border-[rgba(250,245,240,0.08)] rounded-lg px-3 py-2 text-[#1A1614] dark:text-[#FAF5F0] placeholder:text-[#B5ADA7] mt-0.5"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-[#9C908A] dark:text-[#7D7570]">Team B</label>
+                    <input
+                      type="text"
+                      value={newMatch.teamB}
+                      onChange={(e) => setNewMatch({ ...newMatch, teamB: e.target.value })}
+                      placeholder="Argentina"
+                      className="w-full text-sm bg-[#FAF8F5] dark:bg-[#3D3632] border border-[#E8E1DA] dark:border-[rgba(250,245,240,0.08)] rounded-lg px-3 py-2 text-[#1A1614] dark:text-[#FAF5F0] placeholder:text-[#B5ADA7] mt-0.5"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-[#9C908A] dark:text-[#7D7570]">Date (CET)</label>
+                    <input
+                      type="date"
+                      value={newMatch.date}
+                      onChange={(e) => setNewMatch({ ...newMatch, date: e.target.value })}
+                      className="w-full text-sm bg-[#FAF8F5] dark:bg-[#3D3632] border border-[#E8E1DA] dark:border-[rgba(250,245,240,0.08)] rounded-lg px-3 py-2 text-[#1A1614] dark:text-[#FAF5F0] mt-0.5"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-[#9C908A] dark:text-[#7D7570]">Time (CET, 24h)</label>
+                    <input
+                      type="time"
+                      value={newMatch.time}
+                      onChange={(e) => setNewMatch({ ...newMatch, time: e.target.value })}
+                      className="w-full text-sm bg-[#FAF8F5] dark:bg-[#3D3632] border border-[#E8E1DA] dark:border-[rgba(250,245,240,0.08)] rounded-lg px-3 py-2 text-[#1A1614] dark:text-[#FAF5F0] mt-0.5"
+                    />
+                  </div>
+                </div>
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleAddMatch}
+                  disabled={!newMatch.teamA || !newMatch.teamB || !newMatch.date || !newMatch.time}
+                  className="w-full flex items-center justify-center gap-2 bg-[#2D8B5E] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-[#257A4E] transition-colors disabled:opacity-40 disabled:cursor-not-allowed mt-1"
+                >
+                  <Plus className="size-4" />
+                  Add Match to Schedule
+                </motion.button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Custom matches list */}
+          {customMatches.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-[#F0EBE5] dark:border-[rgba(250,245,240,0.06)] flex flex-col gap-1">
+              {customMatches.map((m) => (
+                <div key={m.id} className="flex items-center justify-between text-xs py-1">
+                  <span className="text-[#6B5F57] dark:text-[#A89E96] truncate flex-1">
+                    {m.teamA?.name ?? '?'} vs {m.teamB?.name ?? '?'}
+                    <span className="text-[10px] text-[#B5ADA7] ml-1">
+                      {formatMatchTime(m.date, settings.timeFormat)}
+                    </span>
+                  </span>
+                  <button
+                    onClick={() => removeCustomMatch(m.id)}
+                    className="text-[#B5ADA7] hover:text-[#D94848] transition-colors shrink-0 ml-2"
+                  >
+                    <Trash2 className="size-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
 
         {/* Info */}
         <div className="bg-white dark:bg-[#292524] border border-[#E8E1DA] dark:border-[rgba(250,245,240,0.08)] rounded-2xl p-3 text-center">

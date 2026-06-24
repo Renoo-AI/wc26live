@@ -96,6 +96,17 @@ const matches: Match[] = [
 
 export const allMatches: Match[] = matches;
 
+// ── Custom matches (set from outside) ─────────────────────────────
+let globalCustomMatches: Match[] = [];
+
+export function setGlobalCustomMatches(custom: Match[]) {
+  globalCustomMatches = custom || [];
+}
+
+export function getAllMatches(): Match[] {
+  return [...allMatches, ...globalCustomMatches];
+}
+
 // ── Global overrides ──────────────────────────────────────────────
 let globalOverrides: Record<string, MatchOverride> = {};
 
@@ -117,45 +128,45 @@ function applyOverrides(match: Match): Match {
 
 // ── Queries ───────────────────────────────────────────────────────
 export function getMatchesByDate(dateStr: string): Match[] {
-  return allMatches.map(applyOverrides).filter((m) => m.date.slice(0, 10) === dateStr);
+  return getAllMatches().map(applyOverrides).filter((m) => m.date.slice(0, 10) === dateStr);
 }
 
 export function getMatchesByStage(stage: Stage): Match[] {
-  return allMatches.map(applyOverrides).filter((m) => m.stage === stage);
+  return getAllMatches().map(applyOverrides).filter((m) => m.stage === stage);
 }
 
 export function getMatchById(id: string): Match | undefined {
-  const m = allMatches.find((m) => m.id === id);
+  const m = getAllMatches().find((m) => m.id === id);
   return m ? applyOverrides(m) : undefined;
 }
 
 export function getGroupMatches(group: string): Match[] {
-  return allMatches.map(applyOverrides).filter((m) => m.group === group);
+  return getAllMatches().map(applyOverrides).filter((m) => m.group === group);
 }
 
 export function getUpcomingMatches(): Match[] {
   const now = new Date();
-  return allMatches
+  return getAllMatches()
     .map(applyOverrides)
     .filter((m) => new Date(m.date) > now && m.status !== 'live')
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
 export function getLiveMatches(): Match[] {
-  return allMatches.map(applyOverrides).filter((m) => m.status === 'live');
+  return getAllMatches().map(applyOverrides).filter((m) => m.status === 'live');
 }
 
 export function getAllMatchDates(): string[] {
-  const dates = new Set(allMatches.map((m) => m.date.slice(0, 10)));
+  const dates = new Set(getAllMatches().map((m) => m.date.slice(0, 10)));
   return Array.from(dates).sort();
 }
 
 export function getAllMatchesWithOverrides(): Match[] {
-  return allMatches.map(applyOverrides);
+  return getAllMatches().map(applyOverrides);
 }
 
 export function getRoundOf16Matches(): Match[] { return getMatchesByStage('round_of_16'); }
 export function getQuarterFinalMatches(): Match[] { return getMatchesByStage('quarter_final'); }
 export function getSemiFinalMatches(): Match[] { return getMatchesByStage('semi_final'); }
-export function getThirdPlaceMatch(): Match | undefined { return allMatches.find(m => m.stage === 'third_place'); }
-export function getFinalMatch(): Match | undefined { return allMatches.find(m => m.stage === 'final'); }
+export function getThirdPlaceMatch(): Match | undefined { return getAllMatches().find(m => m.stage === 'third_place'); }
+export function getFinalMatch(): Match | undefined { return getAllMatches().find(m => m.stage === 'final'); }

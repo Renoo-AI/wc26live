@@ -13,7 +13,7 @@ import { SettingsPanel } from '@/components/wc/SettingsPanel';
 import { BottomNav } from '@/components/wc/BottomNav';
 import { Disclaimer } from '@/components/wc/Disclaimer';
 import { BroadcastEnded } from '@/components/wc/BroadcastEnded';
-import { getMatchesByDate, getLiveMatches, allMatches, getAllMatchDates, getUpcomingMatches, setGlobalOverrides } from '@/data/matches';
+import { getMatchesByDate, getLiveMatches, getAllMatches, getAllMatchDates, getUpcomingMatches, setGlobalOverrides, setGlobalCustomMatches } from '@/data/matches';
 import { checkAndNotifyMatches, requestNotificationPermission, hasNotificationPermission } from '@/lib/notifications';
 import { useMatchSync } from '@/lib/useMatchSync';
 import { cn } from '@/lib/utils';
@@ -35,6 +35,7 @@ export default function Home() {
     settings,
     setSettings,
     matchOverrides,
+    customMatches,
   } = useAppStore();
   const { broadcastMessage, clearBroadcastMessage } = useMatchSync();
   const [mounted, setMounted] = useState(false);
@@ -67,10 +68,11 @@ export default function Home() {
     detectCountry();
   }, [setSettings]);
 
-  // Sync admin overrides to matches module
+  // Sync admin overrides + custom matches to matches module
   useEffect(() => {
     setGlobalOverrides(matchOverrides);
-  }, [matchOverrides]);
+    setGlobalCustomMatches(customMatches);
+  }, [matchOverrides, customMatches]);
 
   // Auto-notification polling (checks every 30s for upcoming match times)
   useEffect(() => {
@@ -92,7 +94,7 @@ export default function Home() {
   }, [settings.notifications]);
 
   // Auto-select first date if none selected
-  const allDates = useMemo(() => getAllMatchDates(), []);
+  const allDates = useMemo(() => getAllMatchDates(), [customMatches]);
   const effectiveDate = selectedDate || allDates[0] || '';
 
   // Get matches for selected date
