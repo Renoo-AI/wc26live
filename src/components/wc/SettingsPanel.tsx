@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Moon, Sun, Globe, Bell, Clock, Shield } from 'lucide-react';
+import { Moon, Sun, Globe, Bell, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store/settings';
 import { Switch } from '@/components/ui/switch';
@@ -9,7 +9,7 @@ import { CountrySelector } from './CountrySelector';
 import { Disclaimer } from './Disclaimer';
 
 export function SettingsPanel() {
-  const { settings, setSettings, isAdmin, setAdmin } = useAppStore();
+  const { settings, setSettings } = useAppStore();
 
   return (
     <motion.div
@@ -123,27 +123,6 @@ export function SettingsPanel() {
               setSettings({ theme: checked ? 'light' : 'dark' })
             }
             className="data-[state=checked]:bg-[#C4953A]"
-          />
-        </div>
-      </section>
-
-      {/* Admin Mode */}
-      <section className="bg-[rgba(217,119,87,0.03)] dark:bg-[rgba(232,139,110,0.06)] border border-[rgba(217,119,87,0.25)] dark:border-[rgba(232,139,110,0.2)] rounded-2xl p-4 shadow-[0_1px_3px_rgba(26,22,20,0.04),0_1px_2px_rgba(26,22,20,0.03)]">
-        <div className="flex items-center gap-2 mb-3">
-          <Shield className="size-4 text-[#D97757] dark:text-[#E88B6E]" />
-          <span className="text-sm font-semibold text-[#D97757] dark:text-[#E88B6E]">Admin Mode</span>
-        </div>
-        <p className="text-xs text-[#9C908A] dark:text-[#7D7570] mb-3">
-          Enable admin controls to manage live match status, scores, and timers.
-        </p>
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-[#6B5F57] dark:text-[#A89E96]">
-            {isAdmin ? '🛡️ Admin Enabled' : '🔒 Admin Disabled'}
-          </span>
-          <Switch
-            checked={isAdmin}
-            onCheckedChange={(checked) => setAdmin(checked)}
-            className="data-[state=checked]:bg-[#D97757] dark:data-[state=checked]:bg-[#E88B6E]"
           />
         </div>
       </section>

@@ -10,7 +10,6 @@ import { MatchCard } from '@/components/wc/MatchCard';
 import { MatchSkeletonList } from '@/components/wc/MatchSkeleton';
 import { BracketView } from '@/components/wc/BracketView';
 import { SettingsPanel } from '@/components/wc/SettingsPanel';
-import { AdminPanel } from '@/components/wc/AdminPanel';
 import { BottomNav } from '@/components/wc/BottomNav';
 import { Disclaimer } from '@/components/wc/Disclaimer';
 import { getMatchesByDate, getLiveMatches, allMatches, getAllMatchDates, setGlobalOverrides } from '@/data/matches';
@@ -32,7 +31,6 @@ export default function Home() {
     setExpandedMatchId,
     settings,
     setSettings,
-    isAdmin,
     matchOverrides,
   } = useAppStore();
   const [mounted, setMounted] = useState(false);
@@ -130,9 +128,6 @@ export default function Home() {
             >
               {/* Live Banner */}
               <LiveBanner />
-
-              {/* Admin Panel */}
-              {isAdmin && <AdminPanel />}
 
               {/* Date Selector */}
               <DatePillSelector />
