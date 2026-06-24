@@ -120,6 +120,11 @@
 }
 
 @layer base {
+  /* 140% base scale for best UX across all devices */
+  html {
+    font-size: 140%;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
